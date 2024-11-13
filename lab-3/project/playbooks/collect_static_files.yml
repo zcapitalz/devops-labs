@@ -1,0 +1,77 @@
+---
+- hosts: localhost
+  roles:
+    - install-docker
+
+- hosts: localhost
+  vars_files:
+    - ../vars/collect_static_files.yml
+  tasks:
+    - name: Clone repo
+      git:
+        repo: "{{ app_git_repo_url }}"
+        dest: "{{ app_dir_path_host }}"
+        version: "{{ app_git_repo_branch }}"
+        accept_hostkey: yes
+
+    - name: Copy Dockerfile
+      copy:
+        src: "{{ app_dockerfile_path }}"
+        dest: "{{ app_dir_path_host }}/Dockerfile"
+
+    - name: Register python version
+      shell: grep -Eo "python-[0-9]+\.[0-9]+\.[0-9]+" "{{ app_dir_path_host }}/runtime.txt" | cut -d'-' -f2
+      register: python_version_output
+
+    - name: Build Docker image
+      docker_image:
+        name: app
+        source: build
+        build:
+          path: "{{ app_dir_path_host }}"
+          args:
+            PYTHON_VERSION: "{{ python_version_output.stdout }}"
+
+    - name: Create docker container
+      community.docker.docker_container:
+        name: app
+        image: app
+        state: present
+        command: sleep infinity
+        mounts:
+          - source: "{{ app_static_files_volume_name }}"
+            target: "{{ app_static_files_dir_path_container }}"
+            type: volume
+            read_only: yes
+            consistency: consistent
+    
+    - name: Give everyone read permissions on created static files
+      shell: |
+        d="{{ app_static_files_dir_path_host }}"
+        while [ "$d" != "/" ]; do
+          chmod a+X "$d"
+          d=$(dirname "$d")
+        done
+        chmod -R a+rX {{ app_static_files_dir_path_host }}
+      args:
+        executable: /bin/bash
+      become: true
+
+- hosts: web
+  vars_files:
+    - ../vars/collect_static_files.yml
+  tasks:
+    - name: Create a static files directory if it does not exist
+      file:
+        path: "{{ app_static_files_dir_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Synchronize static files
+      synchronize:
+        src: "{{ app_static_files_dir_path_host }}/"
+        dest: "{{ app_static_files_dir_path }}"
+        delete: yes
+        recursive: yes
+        rsync_path: sudo rsync

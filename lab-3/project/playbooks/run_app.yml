@@ -1,0 +1,32 @@
+---
+- hosts: app
+  roles:
+      - install-docker
+  become: true
+
+- hosts: app
+  vars_files:
+    ../vars/run_app.yml
+  tasks:
+  - name: Pull app image
+    docker_image:
+      name: "{{ docker_image }}"
+      source: pull
+    register: image_info
+    become: true
+
+  - name: Stop and remove existing container if there is new image
+    docker_container:
+      name: app
+      state: absent
+    when: image_info.changed
+    ignore_errors: true
+
+  - name: Run app
+    docker_container:
+      name: app
+      image: "{{ docker_image }}"
+      state: started
+      detach: true
+      ports:
+        - "{{ app_port }}:{{ app_port }}"

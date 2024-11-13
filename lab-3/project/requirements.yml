@@ -1,0 +1,7 @@
+- src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-install-docker.git
+  version: "4abe8d2d1b6784e9a6ced7f9235ab71a219fb409"
+  name: install-docker
+  
+- src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-nginx.git
+  version: "5dd415621f28a3121f2f65fddf090066f76cd7e2"
+  name: nginx

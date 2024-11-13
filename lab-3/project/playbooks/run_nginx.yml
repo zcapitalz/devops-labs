@@ -1,0 +1,19 @@
+---
+- hosts: web
+  vars:
+    app_hosts: "{{ groups['app'] }}"
+  vars_files:
+    - ../vars/collect_static_files.yml
+    - ../vars/run_app.yml
+  tasks:
+  - name: Create nginx config and write to fact
+    set_fact:
+      nginx_config_content: "{{ lookup('template', '../templates/nginx.conf.j2') }}"
+
+  # - name: kek
+  #   debug:
+  #     msg: "{{ nginx_config_content }}"
+
+  - name: Run nginx
+    include_role:
+      name: nginx
