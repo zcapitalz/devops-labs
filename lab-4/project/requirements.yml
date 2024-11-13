@@ -1,0 +1,3 @@
+- src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-openvpn.git
+  version: "093a5933a2409a70b400f482e4f859c222322eb5"
+  name: openvpn

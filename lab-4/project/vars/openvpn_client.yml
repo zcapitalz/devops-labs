@@ -1,0 +1,3 @@
+client_name: zcapital
+openvpn_client_files_dir: "../openvpn_client_files/{{ client_name }}"
+openvpn_ca_server_host: srv1
