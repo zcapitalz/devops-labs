@@ -1,0 +1,59 @@
+---
+- hosts: app
+  vars_files:
+    - ../vars/app.yml
+  become: true
+  gather_facts: false
+  tasks:
+    - name: add Python apt repository
+      apt_repository:
+        repo: ppa:deadsnakes/ppa
+        state: present
+
+    - name: Install python3.12
+      apt:
+        name:
+        - python3.12
+        state: present
+        update_cache: true
+    
+    - name: Check if pip is installed
+      shell: pip --version
+      ignore_errors: true
+      register: pip_version_output
+
+    - name: Install pip for python3.12
+      shell: |
+        wget https://bootstrap.pypa.io/get-pip.py
+        python3.12 get-pip.py
+        rm get-pip.py
+      when: pip_version_output.rc != 0
+
+    - name: Clone repo
+      git:
+        dest: "{{ app_dir_path }}"
+        repo: "{{ app_repo_url }}"
+        version: "{{ app_repo_branch }}"
+        accept_hostkey: yes
+
+    - name: Install requirements
+      shell:
+        chdir: "{{ app_dir_path }}"
+        cmd: pip install -r requirements.txt
+
+    - name: Make migrations and migrate
+      shell:
+        chdir: "{{ app_dir_path }}"
+        cmd: |
+          python3.12 manage.py makemigrations
+          python3.12 manage.py migrate
+
+    - name: Collect static assets
+      shell:
+        chdir: "{{ app_dir_path }}"
+        cmd: python3.12 manage.py collectstatic --no-input
+
+    - name: Run app
+      shell:
+        chdir: "{{ app_dir_path }}"
+        cmd: nohup python3.12 manage.py runserver 0.0.0.0:{{ app_port }} &

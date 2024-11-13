@@ -1,0 +1,6 @@
+app_port: 8000
+app_dir_path: /app
+app_repo_url: https://github.com/mdn/django-locallibrary-tutorial
+app_repo_branch: main
+app_userperuser_username: root
+app_superuser_email: example@gmail.com

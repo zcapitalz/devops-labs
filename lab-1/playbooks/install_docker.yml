@@ -1,0 +1,85 @@
+---
+- hosts: app
+  become: true
+  vars_files:
+    - ../vars/docker.yml
+  tasks:
+    - name: Check if Docker is already installed
+      command: docker version
+      register: docker_version
+      ignore_errors: true
+
+    - name: Stop if Docker is already installed
+      meta: end_host
+      when: docker_version.rc == 0
+
+    - name: Uninstall conflicting packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - docker-compose-v2
+          - docker-doc
+          - podman-docker
+        state: absent
+
+    - name: Install packages required for docker
+      apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker keyring directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker's official GPG key
+      ansible.builtin.get_url:
+        url: "{{ docker_package_gpg_key_url }}"
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Get the system architecture
+      command: dpkg --print-architecture
+      register: cpu_architecture
+
+    - name: Get Ubuntu release codename
+      shell: . /etc/os-release && echo $VERSION_CODENAME
+      register: ubuntu_release
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch={{ cpu_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.asc] {{ docker_package_repo_url }} {{ ubuntu_release.stdout }} stable"
+        state: present
+
+    - name: Install Docker engine
+      apt:
+        name:
+         - docker-ce
+         - docker-ce-cli
+         - containerd.io
+         - docker-buildx-plugin
+         - docker-compose-plugin
+        state: present
+        update_cache: yes
+      become: true
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Verify Docker installation
+      command: docker version
+      register: docker_version
+      changed_when: docker_version.rc == 0
+
+    - name: Add current user to Docker group
+      user:
+        name: "{{ ansible_ssh_user }}"
+        groups: docker
