@@ -3,5 +3,5 @@
   name: install-docker
   
 - src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-nginx.git
-  version: "5dd415621f28a3121f2f65fddf090066f76cd7e2"
+  version: "58da57dee6521267bcdd2d002c5596180c89caa0"
   name: nginx

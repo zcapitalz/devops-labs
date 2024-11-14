@@ -1,7 +1,7 @@
 app_git_repo_url: https://github.com/mdn/django-locallibrary-tutorial
 app_git_repo_branch: main
-app_dir_path_host: /home/zcapital/repo/itmo/sem-7/devops/lab-3/project/app
-app_dockerfile_path: /home/zcapital/repo/itmo/sem-7/devops/lab-3/project/Dockerfile
+app_dir_path_host: /home/zcapital/repo/itmo/sem-7/devops/lab-3/app
+app_dockerfile_path: /home/zcapital/repo/itmo/sem-7/devops/lab-3/Dockerfile
 app_static_files_volume_name: app_staticfiles
 app_static_files_dir_path_container: /app/staticfiles
 app_static_files_dir_path_host: /var/lib/docker/volumes/{{ app_static_files_volume_name }}/_data
