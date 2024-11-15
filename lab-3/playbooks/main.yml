@@ -1,0 +1,4 @@
+---
+- import_playbook: collect_static_files.yml
+- import_playbook: run_nginx.yml
+- import_playbook: run_app.yml
