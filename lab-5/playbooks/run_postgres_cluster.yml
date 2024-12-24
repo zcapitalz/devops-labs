@@ -1,0 +1,28 @@
+---
+- name: Install PostgreSQL
+  hosts: db
+  roles:
+    - postgres
+  tasks:
+    - import_tasks: "{{ playbook_dir }}/../ansible-roles/postgres/tasks/install_postgres.yml"
+
+- name: Run etcd cluster
+  hosts: etcd
+  roles:
+    - postgres
+  tasks:
+    - import_tasks: "{{ playbook_dir }}/../ansible-roles/postgres/tasks/run_etcd.yml"
+
+- name: Run load balancer for etcd cluster
+  hosts: etcd_load_balancer
+  roles:
+    - postgres
+  tasks:
+    - import_tasks: "{{ playbook_dir }}/../ansible-roles/postgres/tasks/run_etcd_load_balancer.yml"
+
+- name: Run patroni
+  hosts: db
+  roles:
+    - postgres
+  tasks:
+    - import_tasks: "{{ playbook_dir }}/../ansible-roles/postgres/tasks/run_patroni.yml"

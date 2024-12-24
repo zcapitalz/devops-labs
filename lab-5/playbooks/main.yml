@@ -1,0 +1,11 @@
+---
+- import_playbook: run_postgres_cluster.yml
+
+- name: Print PostgreSQL cluster leader
+  hosts: db
+  tasks:
+    - import_tasks: "{{ playbook_dir }}/../ansible-roles/postgres/tasks/get_patroni_leader.yml"
+
+    - name: Print PostgreSQL cluster leader
+      debug:
+        msg: "PostgreSQL cluster leader: {{ postgres_patroni_cluster_leader }}"

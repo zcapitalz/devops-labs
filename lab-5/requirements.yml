@@ -1,0 +1,7 @@
+- src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-postgres.git
+  version: "b39790f97ef8298448b96524d334f52f2f490624"
+  name: postgres
+
+- src: git+ssh://git@github.com/zcapitalz/devops-labs-ansible-role-nginx.git
+  version: "58da57dee6521267bcdd2d002c5596180c89caa0"
+  name: nginx
